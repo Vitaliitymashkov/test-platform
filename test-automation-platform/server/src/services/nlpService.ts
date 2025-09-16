@@ -1,8 +1,55 @@
 import axios from 'axios';
+import { webAnalysisService } from './webAnalysisService';
 
-export async function convertNaturalLanguageToPlaywright(naturalLanguage: string): Promise<string> {
+export async function convertNaturalLanguageToPlaywright(
+  naturalLanguage: string,
+  url?: string
+): Promise<string> {
   try {
-    // For MVP, we'll use OpenAI API to convert natural language to Playwright code
+    let pageAnalysisContext = '';
+    
+    // If URL is provided, analyze the page first to get real selectors
+    if (url) {
+      try {
+        const analysis = await webAnalysisService.analyzePage(url);
+        
+        // Build context about the page for better test generation
+        pageAnalysisContext = `
+The target page has been analyzed. Here is the actual page structure:
+- Page URL: ${analysis.url}
+- Page Title: ${analysis.title}
+- Page Type: ${analysis.pageType}
+
+Available interactive elements with their actual selectors:
+${analysis.elements.slice(0, 15).map(el => 
+  `- ${el.type}: selector="${el.selector}" ${el.text ? `text="${el.text}"` : ''} ${el.suggestedName ? `name="${el.suggestedName}"` : ''}`
+).join('\n')}
+
+${analysis.forms.length > 0 ? `
+Forms on the page:
+${analysis.forms.map((form, idx) => `
+Form ${idx + 1}: ${form.formSelector}
+Fields:
+${form.fields.map(field => 
+  `  - ${field.name} (${field.type}): selector="${field.selector}" ${field.label ? `label="${field.label}"` : ''}`
+).join('\n')}
+${form.submitButton ? `  - Submit button: selector="${form.submitButton.selector}"` : ''}
+`).join('\n')}` : ''}
+
+${analysis.navigation.length > 0 ? `
+Navigation elements:
+${analysis.navigation.slice(0, 10).map(nav => 
+  `- ${nav.text}: selector="${nav.selector}" ${nav.href ? `href="${nav.href}"` : ''}`
+).join('\n')}` : ''}
+
+Use these ACTUAL selectors from the page instead of guessing. The selectors above are guaranteed to exist on the page.`;
+      } catch (error) {
+        console.error('Failed to analyze page:', error);
+        // Continue without page analysis if it fails
+      }
+    }
+    
+    // Use OpenAI API to convert natural language to Playwright code
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
@@ -20,6 +67,9 @@ Rules:
 5. Add appropriate waits and assertions
 6. Handle common patterns like login, navigation, form filling
 7. Return ONLY the test code, no explanations
+8. IMPORTANT: If page analysis data is provided, you MUST use the actual selectors from the analyzed page instead of making up selectors
+
+${pageAnalysisContext}
 
 Example input: "Login with valid credentials and verify dashboard is displayed"
 Example output:
@@ -36,11 +86,11 @@ test('Login with valid credentials and verify dashboard is displayed', async ({ 
           },
           {
             role: 'user',
-            content: naturalLanguage
+            content: `${url ? `Target URL: ${url}\n` : ''}Test scenario: ${naturalLanguage}`
           }
         ],
         temperature: 0.3,
-        max_tokens: 1000
+        max_tokens: 1500
       },
       {
         headers: {

@@ -7,6 +7,7 @@ import {
   ChartBarIcon,
   ArrowRightOnRectangleIcon,
   SparklesIcon,
+  CursorArrowRaysIcon,
 } from '@heroicons/react/24/outline';
 
 const navigation = [
@@ -14,6 +15,7 @@ const navigation = [
   { name: 'Features', href: '/features', icon: FolderIcon },
   { name: 'Tests', href: '/tests', icon: DocumentTextIcon },
   { name: 'Reports', href: '/reports', icon: ChartBarIcon },
+  { name: 'Interactive', href: '/interactive', icon: CursorArrowRaysIcon },
 ];
 
 export default function Layout() {
