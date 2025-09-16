@@ -7,6 +7,8 @@ import testRoutes from './routes/tests';
 import featuresRoutes from './routes/features';
 import githubRoutes from './routes/github';
 import reportRoutes from './routes/reports';
+import webAnalysisRoutes from './routes/webAnalysis';
+import interactiveTestRoutes from './routes/interactiveTest';
 import { errorHandler } from './middleware/errorHandler';
 import { authMiddleware } from './middleware/auth';
 
@@ -27,6 +29,8 @@ app.use('/api/features', authMiddleware, featuresRoutes);
 app.use('/api/tests', authMiddleware, testRoutes);
 app.use('/api/github', authMiddleware, githubRoutes);
 app.use('/api/reports', authMiddleware, reportRoutes);
+app.use('/api/web-analysis', authMiddleware, webAnalysisRoutes);
+app.use('/api/interactive-test', interactiveTestRoutes);
 
 app.use(errorHandler);
 

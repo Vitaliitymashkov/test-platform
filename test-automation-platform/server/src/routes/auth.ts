@@ -98,9 +98,13 @@ router.post('/github/callback', async (req, res) => {
         githubUsername: user.github_username,
       },
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('GitHub auth error:', error);
-    res.status(500).json({ error: 'Authentication failed' });
+    console.error('Error details:', error.response?.data || error.message);
+    res.status(500).json({ 
+      error: 'Authentication failed',
+      details: error.response?.data?.message || error.message 
+    });
   }
 });
 

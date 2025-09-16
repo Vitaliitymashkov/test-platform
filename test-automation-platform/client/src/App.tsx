@@ -11,6 +11,7 @@ import ReportsPage from './pages/ReportsPage';
 import GitHubCallbackPage from './pages/GitHubCallbackPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import TestPage from './pages/TestPage';
+import InteractiveTestPage from './pages/InteractiveTestPage';
 
 const queryClient = new QueryClient();
 
@@ -37,6 +38,7 @@ function App() {
               <Route path="features" element={<FeaturesPage />} />
               <Route path="tests" element={<TestsPage />} />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="interactive" element={<InteractiveTestPage />} />
             </Route>
           </Routes>
         </Router>

@@ -49,15 +49,15 @@ router.get('/:id', async (req: AuthRequest, res) => {
 
 // Create a new test case
 router.post('/', async (req: AuthRequest, res) => {
-  const { title, description, naturalLanguage, featureId } = req.body;
+  const { title, description, naturalLanguage, featureId, url } = req.body;
   
   if (!title || !naturalLanguage || !featureId) {
     return res.status(400).json({ error: 'Title, natural language, and feature ID are required' });
   }
 
   try {
-    // Convert natural language to Playwright code
-    const playwrightCode = await convertNaturalLanguageToPlaywright(naturalLanguage);
+    // Convert natural language to Playwright code (with optional URL for page analysis)
+    const playwrightCode = await convertNaturalLanguageToPlaywright(naturalLanguage, url);
     
     // Insert test case into database
     const result = await pool.query(
@@ -100,7 +100,7 @@ router.post('/', async (req: AuthRequest, res) => {
 
 // Update a test case
 router.put('/:id', async (req: AuthRequest, res) => {
-  const { title, description, naturalLanguage } = req.body;
+  const { title, description, naturalLanguage, url } = req.body;
   
   try {
     // Check if test case exists and belongs to user
@@ -118,7 +118,7 @@ router.put('/:id', async (req: AuthRequest, res) => {
     // Convert natural language to Playwright code if changed
     let playwrightCode = testCase.playwright_code;
     if (naturalLanguage && naturalLanguage !== testCase.natural_language) {
-      playwrightCode = await convertNaturalLanguageToPlaywright(naturalLanguage);
+      playwrightCode = await convertNaturalLanguageToPlaywright(naturalLanguage, url);
     }
     
     // Update test case
